@@ -10,7 +10,7 @@ task downloadSDK(type:Exec) {
 
     println 'Download SDK'
     workingDir './'
-    commandLine "python3", "download_native_sdk.py", "--version", "1.0.0"
+    commandLine "python", "download_native_sdk.py", "--version", "1.0.0"
 
 }
 
