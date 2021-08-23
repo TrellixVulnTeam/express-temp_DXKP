@@ -16,12 +16,13 @@ def __parse_args(args):
     args = args[1:]
     parser = argparse.ArgumentParser(description='The root build script.')
 
-    parser.add_argument('--version', type=str, default='')
+    parser.add_argument('--sdk_download_url', type=str, default='')
+    parser.add_argument('--sdk_zip_root_folder', type=str, default='')
 
     return parser.parse_args(args)
 
 
-def unzip_file(src_zip_file, dst_folder):
+def __unzip_file(src_zip_file, dst_folder):
     if src_zip_file.endswith('.tar') or src_zip_file.endswith('.gz'):
         with tarfile.open(src_zip_file, 'r:gz') as f:
             f.extractall(dst_folder)
@@ -38,6 +39,9 @@ def main(argv):
     print("arguments: {}".format(args))
     print(sys.version)
 
+    if len(args.sdk_download_url) == 0:
+        raise Exception("SDK URL must not be EMPTY!")
+
     dst_libs_path = os.path.join(THIS_SCRIPT_PATH, 'libs')
     dst_jni_path = os.path.join(THIS_SCRIPT_PATH, 'src', 'main', 'jniLibs')
 
@@ -49,8 +53,7 @@ def main(argv):
         shutil.rmtree(dst_jni_path, ignore_errors=True)
     os.mkdir(dst_jni_path)
 
-
-    oss_url = 'https://storage.zego.im/express/video/android/zego-express-video-android-{}.zip'.format(args.version)
+    oss_url = args.sdk_download_url
     artifact_name = oss_url.split('/')[-1]
 
     request = urllib2.Request(oss_url)
@@ -64,18 +67,26 @@ def main(argv):
         fw.write(u.read())
 
     tmp_dst_unzip_folder = os.path.join(THIS_SCRIPT_PATH, '__tmp__')
-    unzip_file(artifact_path, tmp_dst_unzip_folder)
+    __unzip_file(artifact_path, tmp_dst_unzip_folder)
 
-    for folder in os.listdir(tmp_dst_unzip_folder):
-        product_folder = os.path.join(tmp_dst_unzip_folder, folder)
-        if os.path.isdir(product_folder):
-            for f in os.listdir(product_folder):
-                if os.path.isdir(os.path.join(product_folder, f)):
-                    shutil.copytree(os.path.join(product_folder, f), os.path.join(dst_jni_path, f))
-                else:
-                    shutil.copy(os.path.join(product_folder, f), os.path.join(dst_libs_path))
+    if len(args.sdk_zip_root_folder) == 0:
+        for folder in os.listdir(tmp_dst_unzip_folder):
+            product_folder = os.path.join(tmp_dst_unzip_folder, folder)
+            if os.path.isdir(product_folder):
+                for f in os.listdir(product_folder):
+                    if os.path.isdir(os.path.join(product_folder, f)):
+                        shutil.copytree(os.path.join(product_folder, f), os.path.join(dst_jni_path, f))
+                    else:
+                        shutil.copy(os.path.join(product_folder, f), os.path.join(dst_libs_path))
 
-            break
+                break
+    else:
+        product_folder = os.path.join(tmp_dst_unzip_folder, args.sdk_zip_root_folder)
+        for f in os.listdir(product_folder):
+            if os.path.isdir(os.path.join(product_folder, f)):
+                shutil.copytree(os.path.join(product_folder, f), os.path.join(dst_jni_path, f))
+            else:
+                shutil.copy(os.path.join(product_folder, f), os.path.join(dst_libs_path))
 
     print("Download SDK success")
 
