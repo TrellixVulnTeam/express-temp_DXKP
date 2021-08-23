@@ -9,7 +9,7 @@ task downloadSDK {
     // 任务调用前执行动作
     println 'Download SDK'
 
-    commandLine "python3", "download_native_sdk.py", "$versionName"
+    commandLine "python3", "download_native_sdk.py", "1.0.0"
 }
 
 android {
