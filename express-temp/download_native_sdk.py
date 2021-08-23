@@ -36,7 +36,7 @@ def unzip_file(src_zip_file, dst_folder):
 def main(argv):
     args = __parse_args(argv)
     print("arguments: {}".format(args))
-
+    print(sys.version)
 
     dst_libs_path = os.path.join(THIS_SCRIPT_PATH, 'libs')
     dst_jni_path = os.path.join(THIS_SCRIPT_PATH, 'src', 'main', 'jniLibs')
