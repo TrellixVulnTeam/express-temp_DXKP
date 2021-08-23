@@ -7,6 +7,7 @@ import zipfile
 import tarfile
 import subprocess
 import ssl
+import argparse
 
 THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -34,6 +35,8 @@ def unzip_file(src_zip_file: str, dst_folder: str):
 def main(argv):
     args = __parse_args(argv)
     print("arguments: {}".format(args))
+
+    return 0
 
     '''
     dst_libs_path = os.path.join(THIS_SCRIPT_PATH, 'libs')
