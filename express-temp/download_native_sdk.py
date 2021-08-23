@@ -2,12 +2,13 @@ import os
 import json
 import sys
 import shutil
-import urllib.request
+import urllib2
 import zipfile
 import tarfile
 import subprocess
 import ssl
 import argparse
+
 
 THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,7 +21,7 @@ def __parse_args(args):
     return parser.parse_args(args)
 
 
-def unzip_file(src_zip_file: str, dst_folder: str):
+def unzip_file(src_zip_file, dst_folder):
     if src_zip_file.endswith('.tar') or src_zip_file.endswith('.gz'):
         with tarfile.open(src_zip_file, 'r:gz') as f:
             f.extractall(dst_folder)
@@ -36,57 +37,50 @@ def main(argv):
     args = __parse_args(argv)
     print("arguments: {}".format(args))
 
-    return 0
 
-    '''
     dst_libs_path = os.path.join(THIS_SCRIPT_PATH, 'libs')
     dst_jni_path = os.path.join(THIS_SCRIPT_PATH, 'src', 'main', 'jniLibs')
 
     if os.path.exists(dst_libs_path):
-        shutil.rmtree(tmp_dst_unzip_folder, ignore_errors=True)
+        shutil.rmtree(dst_libs_path, ignore_errors=True)
+    os.mkdir(dst_libs_path)
 
-    if os.path.exists(dst_include_path) and os.path.exists(dst_libs_path):
-        print('SDK has exists, ignore download')
-        exit(0)
+    if os.path.exists(dst_jni_path):
+        shutil.rmtree(dst_jni_path, ignore_errors=True)
+    os.mkdir(dst_jni_path)
 
-    try:
-        with open(os.path.join(deps_path, 'deps.json')) as json_reader:
-            json_str = json_reader.read()
-            json_config = json.loads(json_str)
 
-            sdk_version = json_config['version']
-
-    except Exception as e:
-        raise Exception("No deps json, throw error")
-
-    oss_url = 'https://storage.zego.im/express/audio/windows/zego-express-audio-windows-{}.zip'.format(sdk_version)
+    oss_url = 'https://storage.zego.im/express/video/android/zego-express-video-android-{}.zip'.format(args.version)
     artifact_name = oss_url.split('/')[-1]
 
-    request = urllib.request.Request(oss_url)
+    request = urllib2.Request(oss_url)
     print('\n --> Request: "{}"'.format(oss_url))
     context = ssl._create_unverified_context()
-    u = urllib.request.urlopen(request, context=context)
-    print(' <-- Response: "{}"'.format(u.status))
+    u = urllib2.urlopen(request, context=context)
+    print(' <-- Response: "{}"'.format(u.code))
 
-    artifact_path = os.path.join(deps_path, artifact_name)
+    artifact_path = os.path.join(THIS_SCRIPT_PATH, artifact_name)
     with open(artifact_path, 'wb') as fw:
         fw.write(u.read())
 
-    tmp_dst_unzip_folder = os.path.join(deps_path, '__tmp__')
-    if os.path.exists(tmp_dst_unzip_folder):
-        shutil.rmtree(tmp_dst_unzip_folder, ignore_errors=True)
-
+    tmp_dst_unzip_folder = os.path.join(THIS_SCRIPT_PATH, '__tmp__')
     unzip_file(artifact_path, tmp_dst_unzip_folder)
 
     for folder in os.listdir(tmp_dst_unzip_folder):
         product_folder = os.path.join(tmp_dst_unzip_folder, folder)
-        for f in os.listdir(product_folder):
-            shutil.copytree(os.path.join(product_folder, f), os.path.join(deps_path, f))
+        if os.path.isdir(product_folder):
+            for f in os.listdir(product_folder):
+                if os.path.isdir(os.path.join(product_folder, f)):
+                    shutil.copytree(os.path.join(product_folder, f), os.path.join(dst_jni_path, f))
+                else:
+                    shutil.copy(os.path.join(product_folder, f), os.path.join(dst_libs_path))
+
+            break
+
     print("Download SDK success")
 
     shutil.rmtree(tmp_dst_unzip_folder, ignore_errors=True)
     os.remove(artifact_path)
-    '''
 
 
 if __name__ == '__main__':
