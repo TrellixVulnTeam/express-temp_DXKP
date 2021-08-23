@@ -5,15 +5,6 @@ plugins {
 
 group='com.github.zegolibrary'
 
-task downloadSDK(type:Exec) {
-    // 任务调用前执行动作
-
-    println 'Download SDK'
-    workingDir './'
-    commandLine "python", "download_native_sdk.py", "--version", "2.10.0"
-
-}
-
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -33,12 +24,19 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            //downloadSDK
+
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    task downloadSDK(type:Exec) {
+
+        workingDir './'
+        commandLine "python", "download_native_sdk.py", "--version", "${defaultConfig.versionName}"
+
     }
 
     tasks.withType(JavaCompile) {
