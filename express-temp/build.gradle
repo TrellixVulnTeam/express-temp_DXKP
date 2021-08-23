@@ -5,6 +5,14 @@ plugins {
 
 group='com.github.zegolibrary'
 
+task downloadSDK {
+    // 任务调用前执行动作
+    println 'Download SDK'
+
+    workingDir './'
+    commandLine "python3","download_native_sdk.py", "$versionName"
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -13,16 +21,18 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "2.10.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            downloadSDK
         }
     }
     compileOptions {
