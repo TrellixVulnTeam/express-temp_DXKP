@@ -35,7 +35,7 @@ android {
     task downloadSDK(type:Exec) {
 
         workingDir './'
-        commandLine "python", "download_native_sdk.py", "--sdk_download_url", "", "--sdk_zip_root_folder", ""
+        commandLine "python", "download_native_sdk.py", "--sdk_download_url", "https://storage.zego.im/express/video/android/zego-express-video-android.zip", "--sdk_zip_root_folder", ""
 
     }
 
